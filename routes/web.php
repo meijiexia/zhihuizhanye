@@ -24,3 +24,20 @@ Route::match(['get','post'],'shareholder', '\App\Http\Controllers\enterpriseQuer
 Route::match(['get','post'],'keyPersonnel', '\App\Http\Controllers\enterpriseQueryController@keyPersonnel');
 //工商变更
 Route::match(['get','post'],'alteration', '\App\Http\Controllers\enterpriseQueryController@alteration');
+//联系方式
+Route::match(['get','post'],'Contact', '\App\Http\Controllers\enterpriseQueryController@Contact');
+//员工人脉
+Route::match(['get','post'],'Employee', '\App\Http\Controllers\enterpriseQueryController@Employee');
+
+
+
+
+
+
+
+//高级筛选获取条件组
+Route::match(['get','post'],'conditionGroup', '\App\Http\Controllers\CompanyScreenController@conditionGroup');
+Route::match(['get','post'],'conditionList', '\App\Http\Controllers\CompanyScreenController@conditionList');
+Route::match(['get','post'],'companyList', '\App\Http\Controllers\CompanyScreenController@companyList');
+Route::match(['get','post'],'turnClue', '\App\Http\Controllers\CompanyScreenController@turnClue');
+Route::match(['get','post'],'recommendCompany', '\App\Http\Controllers\CompanyScreenController@recommendCompany');

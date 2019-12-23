@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+//修改sql返回形势
+use Illuminate\Database\Events\StatementPrepared;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,9 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        //
+        //修改sql返回形势
+//        Event::listen(StatementPrepared::class, function ($event) {
+//            $event->statement->setFetchMode(\PDO::FETCH_ASSOC);  //这里我们使用PDO::FETCH_ASSOC
+//        });
     }
 }

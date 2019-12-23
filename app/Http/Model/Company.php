@@ -61,4 +61,26 @@ class Company extends Model{
         }
         return $return;
     }
+
+    //获取联系方式
+    public function Contact($companyid){
+        $contact = DB::table('user_personnel')->where('company_id',$companyid)->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        foreach ($contact as $k => $v){
+            $user = DB::table('user_personnel_contact')->where('user_id',$v['user_id'])->get()->map(function ($value) {
+                return (array)$value;
+            })->toArray();
+            $contact[$k]['user_contact'] = $user;
+        }
+        return $contact;
+    }
+
+    //获取员工人脉
+    public function Employee($company){
+        $contact = DB::table('user_personnel')->where('company_id',$company['companyid'])->skip($company['start'])->take($company['num'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        return $contact;
+    }
 }

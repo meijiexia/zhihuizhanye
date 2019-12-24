@@ -20,8 +20,7 @@ class Company extends Model{
     //自动维护时间戳
     public $timestamps = false;
     public function companyList($parameter){
-        $company = DB::table('Company');
-        if(empty($parameter['content'])) return false;
+        $company = DB::table('company');
 //        DB::connection()->enableQueryLog();
         if($parameter['field'] && $parameter['content']){
             $company = $company->where('name','like','%'.$parameter['content'].'%');

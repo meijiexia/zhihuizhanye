@@ -19,26 +19,17 @@ class Shareholder extends Model{
     protected $guarded = [];
     //自动维护时间戳
     public $timestamps = false;
-    public static function company_id($name){
-        $company = DB::table('Company');
-        $company = $company->where('name','like',$name);
-        $company_id = $company->pluck('company_id');
-        return $company_id[0];
-    }
 
 
     public function basicMsg($parameter){
-        if($parameter['name']){
+        if($parameter['company_id']){
             $company = DB::table('Company');
-            $company = $company->where('name','like','%'.$parameter['name'].'%');
+            $company = $company->where('company_id',$parameter['company_id']);
             $data = $company
-                ->select(['company_id','name','address','company_desc','main_business','update_time','social_code','registration_num','organization_code','company_status','registered_money','company_type','company_creat_time','company_end_time','register_agency','approve_time','company_scale'])
+                ->select(['company_id','name','address','level','legal_person','company_desc','main_business','update_time','social_code','registration_num','organization_code','company_status','registered_money','company_type','company_creat_time','company_end_time','register_agency','approve_time','company_scale','website_id'])
                 ->first();
-            $website = DB::table('website');
-            $website = $website->where('company_id','=',$data->company_id)
-                ->select('website_address')
-                ->first();
-            $data->website_address = $website->website_address;
+            $rst = DB::table('website')->where('website_id',$data->website_id)->where('website_status',0)->first();
+            $data->website = $rst->website_address;
             $return = $data;
         }else{
             $return = false;
@@ -47,7 +38,7 @@ class Shareholder extends Model{
     }
 
     public function shareholderList($parameter){
-        $company_id = $this->company_id($parameter['name']);
+        $company_id = $parameter['company_id'];//$this->company_id($parameter['name']);
         //offset 设置从哪里开始，limit 设置想要查询多少条数据
         $return = array();
         if($parameter['limit']){
@@ -64,7 +55,7 @@ class Shareholder extends Model{
         $return['page'] = $parameter['page'];//当前页
 //        DB::connection()->enableQueryLog();
         $return['data'] = $shareholder
-            ->select(['shareholder_name','shareholder_money','shareholder_time'])
+            ->select(['shareholder_name','shareholer_act_money','shareholder_money','shareholder_time'])
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -72,7 +63,7 @@ class Shareholder extends Model{
         return $return;
     }
     public function keyPersonnel($parameter){
-        $company_id = $this->company_id($parameter['name']);
+        $company_id = $parameter['company_id'];//$this->company_id($parameter['name']);
         $return = array();
         if($parameter['limit']){
             $limit = $parameter['limit'];
@@ -101,7 +92,7 @@ class Shareholder extends Model{
     }
 
     public function alteration($parameter){
-        $company_id = $this->company_id($parameter['name']);
+        $company_id = $parameter['company_id'];//$this->company_id($parameter['name']);
         //offset 设置从哪里开始，limit 设置想要查询多少条数据
         $return = array();
         if($parameter['limit']){
@@ -126,6 +117,112 @@ class Shareholder extends Model{
             ->get();
 //        dump(DB::getQueryLog());
         return $return;
+    }
+
+    //获取公司发展融资历史数据
+    public function companyDevelopmentFinancing($parameter){
+        $company_id = $parameter['company_id'];
+        $rst = DB::table('financing_record')->where('company_id',$company_id)->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        return $rst;
+    }
+
+    //获取创始团队数据
+    public function companyDevelopmentTeam($parameter){
+        $count = DB::table('initiation_team')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('initiation_team')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
+    }
+
+    //获取相似产品数据
+    public function companyDevelopmentProduct($parameter){
+        $count = DB::table('similar_product')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('similar_product')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
+    }
+
+    //获取资质证书数据
+    public function companyDevelopmentCertificate($parameter){
+        $category = DB::table('certificate')->where('company_id',$parameter['company_id'])->orderBy('certified_time','asc')->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        foreach ($category as $k => $v){
+            $content[] = $v['certificate_type'];
+        }
+        $contents = array_unique($content);
+        $count = count($contents);
+        $contents = implode('、',$contents);
+        $time = date('Y-m-d',$category[0]['certified_time']);
+        $categorys['contents'] = $contents;
+        $categorys['count'] = $count;
+        $categorys['time'] = $time;
+        $counts = DB::table('certificate')->where('company_id',$parameter['company_id'])->count();
+        $Certificate = DB::table('certificate')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['certificate'] = $Certificate;
+        $data['categorys'] = $categorys;
+        $data['counts'] = $counts;
+        return $data;
+    }
+
+    //获取税务资质数据
+    public function companyDeveTaxQualification($parameter){
+        $count = DB::table('tax_qualification')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('tax_qualification')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
+    }
+
+    //获取注册人员数据
+    public function companyDevePersonnel($parameter){
+        $count = DB::table('registered_personnel')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('registered_personnel')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
+    }
+
+    //获取进出口数据
+    public function companyDeveImportExport($parameter){
+        $rst = DB::table('import_export')->where('company_id',$parameter['company_id'])->first();
+        return $rst;
+    }
+
+    //获取专利信息数据
+    public function companyDevePatent($parameter){
+        $count = DB::table('patent_information')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('patent_information')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
+    }
+
+    //获取软件著作权数据
+    public function companyDeveSoftwareCopyright($parameter){
+        $count = DB::table('software_copyright')->where('company_id',$parameter['company_id'])->count();
+        $rst = DB::table('software_copyright')->where('company_id',$parameter['company_id'])->skip($parameter['start'])->take($parameter['limit'])->get()->map(function ($value) {
+            return (array)$value;
+        })->toArray();
+        $data['rst'] = $rst;
+        $data['count'] = $count;
+        return $data;
     }
 
 }

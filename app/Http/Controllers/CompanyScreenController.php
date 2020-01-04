@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+header("Access-Control-Allow-Origin:*");
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -11,12 +11,48 @@ use Illuminate\Http\Request;
 class CompanyScreenController extends BaseController
 {
     /**************************************************** 企业高级筛选控制器 ****************************************/
+    /*  设置条件组 */
+    public function companyConditionGroupSet(Request $request){
+        $condition = $request->input();
+        $model = new \App\Http\Model\Screen();
+        $data = $model->companyConditionGroupSet($condition);
+        if($data){
+            $return['status'] = 1;
+            $return['data'] = $data;
+            $return['msg'] = '请求成功！';
+        }else{
+            $return['status'] = 0;
+            $return['msg'] = '请求失败！';
+        }
+        echo json_encode($return);
+        exit;
+    }
+
     /*   获取条件组     */
-    public function conditionGroup(Request $request){
+    public function companyConditionGroupGet(Request $request){
         session(['uid'=>1]);
         $uid = session('uid');//$request->input('uid');
+        $key = $request->input('key');
         $model = new \App\Http\Model\Screen();
-        $data = $model->screenList($uid);
+        $data = $model->screenList($uid,$key);
+        $return = array();
+        if($data){
+            $return['status'] = 1;
+            $return['msg'] = '请求成功！';
+            $return['data'] = $data;
+        }else{
+            $return['status'] = 1;
+            $return['msg'] = '请求失败！';
+        }
+        echo json_encode($return);
+        exit;
+    }
+
+    /*   删除条件组     */
+    public function companyConditionGroupDel(Request $request){
+        $id = $request->input('id');
+        $model = new \App\Http\Model\Screen();
+        $data = $model->companyConditionGroupDel($id);
         $return = array();
         if($data){
             $return['status'] = 1;
@@ -50,7 +86,7 @@ class CompanyScreenController extends BaseController
     /*    获取企业信息     */
     public function companyList(Request $request){
         $screen = $request->input();
-        $screen['start'] = ($screen['page']-1)*$screen['num'];
+        $screen['start'] = ($screen['page']-1)*$screen['limit'];
         $model = new \App\Http\Model\Screen();
         $data = $model->companyList($screen);
         $return = array();

@@ -23,7 +23,7 @@ class Shareholder extends Model{
 
     public function basicMsg($parameter){
         if($parameter['company_id']){
-            $company = DB::table('Company');
+            $company = DB::table('company');
             $company = $company->where('company_id',$parameter['company_id']);
             $data = $company
                 ->select(['company_id','name','address','level','legal_person','company_desc','main_business','update_time','social_code','registration_num','organization_code','company_status','registered_money','company_type','company_creat_time','company_end_time','register_agency','approve_time','company_scale','website_id'])
@@ -48,7 +48,7 @@ class Shareholder extends Model{
             $limit = 1;
             $offset = $parameter['page'];
         }
-        $shareholder = DB::table('Shareholder');
+        $shareholder = DB::table('shareholder');
         $shareholder = $shareholder->where('company_id','=',$company_id);
         $return['count'] = $shareholder->count();//总条数
         $return['page'] = ceil($return['count']/$limit);//页数

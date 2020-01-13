@@ -25,8 +25,7 @@ class Shareholder extends Model{
         if($parameter['company_id']){
             $company = DB::table('company');
             $company = $company->where('company_id',$parameter['company_id']);
-            $data = $company
-                ->select(['company_id','name','address','level','legal_person','company_desc','main_business','update_time','social_code','registration_num','organization_code','company_status','registered_money','company_type','company_creat_time','company_end_time','register_agency','approve_time','company_scale','website_id'])
+            $data = $company->select(['company_id','name','address','level','legal_person','company_desc','main_business','update_time','social_code','registration_num','organization_code','company_status','registered_money','company_type','company_creat_time','company_end_time','register_agency','approve_time','company_scale','website_id'])
                 ->first();
             $rst = DB::table('website')->where('website_id',$data->website_id)->where('website_status',0)->first();
             $data->website = $rst->website_address;
